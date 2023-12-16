@@ -1,5 +1,5 @@
 import express from 'express'
-import corsMiddleware from './cors.js'
+import { corsMiddleware } from './cors.js'
 import customerRouter from './controllers/customer.js'
 import storeRouter from './controllers/store.js'
 import staffRouter from './controllers/staff.js'
@@ -10,9 +10,9 @@ import { ErrorHandler, requestLogger } from './middleware/index.js'
 import rentalRouter from './controllers/rental.js'
 
 const app = express()
-app.use(corsMiddleware())
 
 // app.use(requestLogger)
+app.use(corsMiddleware())
 
 app.use('/users', userRouter)
 app.use('/stores', storeRouter)

@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { customerSchema } from '../db/sql/schemas/index.js'
 import dbConn from '../db/sql/dbConn.js'
+import {
+  GetCustomerPayemnts,
+  GetSummaryCustomerPayments,
+} from '../db/sql/repository/payments-repo.js'
 // import { customerSchema } from '../db/schema/dvdrental.js'
 
 // import dbConn from '../db/pgConn.js'
@@ -21,9 +25,14 @@ class CustomerController {
     const userFound = await dbConn.query.customerSchema.findFirst({
       where: (customerSchema, { eq }) =>
         eq(customerSchema.customer_id, req.params.id),
+      with: { address: true },
     })
+    const [avgCustomerPayment] = await GetSummaryCustomerPayments(req.params.id)
 
-    if (userFound) return res.status(200).send(userFound)
+    if (userFound && avgCustomerPayment)
+      return res
+        .status(200)
+        .send({ userInfo: userFound, paymentsSummary: avgCustomerPayment })
 
     return res.send({ message: 'User not found' })
   }

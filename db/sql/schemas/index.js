@@ -96,6 +96,17 @@ export const rentalSchema = pgTable('rental', {
   last_update: timestamp('last_update', { default: 'now()' }),
 })
 
+export const addressSchema = pgTable('address', {
+  address_id: serial('address_id').primaryKey(),
+  nombre: varchar('nombre', { length: 50 }).notNull(),
+  direccion2: varchar('direccion2', { length: 50 }),
+  distrito: varchar('distrito', { length: 20 }).notNull(),
+  city_id: smallint('city_id').notNull(),
+  postal_code: varchar('postal_code', { length: 10 }),
+  telefono: varchar('telefono', { length: 20 }).notNull(),
+  last_update: timestamp('last_update').default(`now()`),
+})
+
 export const paymentSchema = pgTable('payment', {
   payment_id: serial('payment_id').notNull(),
   customer_id: smallint('customer_id')
@@ -110,9 +121,20 @@ export const paymentSchema = pgTable('payment', {
   monto: numeric('monto').notNull(),
   fecha: timestamp('fecha').notNull(),
 })
-export const customerRelationships = relations(customerSchema, ({ many }) => ({
-  payments: many(paymentSchema),
-  rentals: many(rentalSchema),
+export const customerRelationships = relations(
+  customerSchema,
+  ({ many, one }) => ({
+    payments: many(paymentSchema),
+    rentals: many(rentalSchema),
+    address: one(addressSchema, {
+      fields: [customerSchema.address_id],
+      references: [addressSchema.address_id],
+    }),
+  })
+)
+
+export const addressRelationships = relations(addressSchema, ({ one }) => ({
+  customer: one(customerSchema),
 }))
 
 export const paymentRelationships = relations(paymentSchema, ({ one }) => ({

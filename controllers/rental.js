@@ -1,5 +1,5 @@
 import dbConn from '../db/sql/dbConn.js'
-import { eq } from 'drizzle-orm'
+import { eq, sum, count } from 'drizzle-orm'
 import {
   customerSchema,
   filmSchema,
@@ -9,39 +9,23 @@ import {
 } from '../db/sql/schemas/index.js'
 
 import { Router } from 'express'
+import { GetCustomerRentals } from '../db/sql/repository/payments-repo.js'
 
 const rentalRouter = Router()
 
+// .selectDistinct({
+//   filmName: filmSchema.titulo,
+//   rentalDate: rentalSchema.fecha_de_renta,
+//   returnDate: rentalSchema.fecha_de_retorno,
+// })
 class RentalController {
   static async getCustomerRentals(req, res, next) {
-    const customerRentals = await dbConn
-      .select({
-        filmName: filmSchema.titulo,
-        rentalDate: rentalSchema.fecha_de_renta,
-        returnDate: rentalSchema.fecha_de_retorno,
-        amountPaid: paymentSchema.monto,
-        customerId: customerSchema.customer_id,
-      })
-      .from(customerSchema)
-      .where(eq(customerSchema.customer_id, req.params.userId))
-      .innerJoin(
-        rentalSchema,
-        eq(customerSchema.customer_id, rentalSchema.customer_id)
-      )
-      .innerJoin(
-        paymentSchema,
-        eq(customerSchema.customer_id, paymentSchema.customer_id)
-      )
-      .innerJoin(
-        inventorySchema,
-        eq(inventorySchema.inventory_id, rentalSchema.inventory_id)
-      )
-      .innerJoin(filmSchema, eq(filmSchema.film_id, inventorySchema.film_id))
+    const customerRentals = await GetCustomerRentals(req.params.customerId)
 
-    res.json(customerRentals)
+    res.status(200).json(customerRentals)
   }
 }
 
-rentalRouter.get('/:userId', RentalController.getCustomerRentals)
+rentalRouter.get('/:customerId', RentalController.getCustomerRentals)
 
 export default rentalRouter

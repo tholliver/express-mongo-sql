@@ -2,6 +2,7 @@ import { customerSchema, paymentSchema } from '../db/sql/schemas/index.js'
 import { Router } from 'express'
 import dbConn from '../db/sql/dbConn.js'
 import { avg, eq, sql, count, sum } from 'drizzle-orm'
+import { GetSummaryCustomerPayments } from '../db/sql/repository/payments-repo.js'
 // import { NotFoundError } from '../middleware/error-types'
 
 const paymentRouter = Router()
@@ -37,34 +38,21 @@ class PaymentController {
       // })
 
       const customerPayemnt = await dbConn
-        .select({ amout: paymentSchema.monto })
+        .select({
+          amout: paymentSchema.monto,
+          userName: customerSchema.nombre,
+          userLastName: customerSchema.apellido,
+        })
         .from(customerSchema)
-        .where(eq(customerSchema.customer_id, req.params.userId))
+        .where(eq(customerSchema.customer_id, req.params.customerId))
         .innerJoin(
           paymentSchema,
           eq(customerSchema.customer_id, paymentSchema.customer_id)
         )
 
-      const [avgCustomerPayment] = await dbConn
-        .select({
-          customerId: customerSchema.customer_id,
-          averagePayment:
-            sql`round(cast(avg(${paymentSchema.monto}) as numeric), 2)`.mapWith(
-              Number
-            ),
-          count: count(customerSchema.customer_id),
-          sum: sql`round(cast(sum(${paymentSchema.monto}) as numeric), 2)`.mapWith(
-            Number
-          ),
-        })
-        .from(customerSchema)
-        .where(eq(customerSchema.customer_id, req.params.userId))
-        .innerJoin(
-          paymentSchema,
-          eq(customerSchema.customer_id, paymentSchema.customer_id)
-        )
-        .groupBy(customerSchema.customer_id)
-        .limit(1)
+      const [avgCustomerPayment] = await GetSummaryCustomerPayments(
+        req.params.customerId
+      )
 
       return res.json(avgCustomerPayment)
     } catch (error) {
@@ -74,6 +62,6 @@ class PaymentController {
 }
 
 paymentRouter.get('/', PaymentController.getPayements)
-paymentRouter.get('/customer/:userId', PaymentController.getCustomerPayment)
+paymentRouter.get('/customer/:customerId', PaymentController.getCustomerPayment)
 
 export default paymentRouter
