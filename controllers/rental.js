@@ -9,23 +9,35 @@ import {
 } from '../db/sql/schemas/index.js'
 
 import { Router } from 'express'
-import { GetCustomerRentals } from '../db/sql/repository/payments-repo.js'
+import {
+  GetCustomerRentals,
+  GetTopRentedFilms,
+} from '../db/sql/repository/payments-repo.js'
 
 const rentalRouter = Router()
 
-// .selectDistinct({
-//   filmName: filmSchema.titulo,
-//   rentalDate: rentalSchema.fecha_de_renta,
-//   returnDate: rentalSchema.fecha_de_retorno,
-// })
 class RentalController {
   static async getCustomerRentals(req, res, next) {
-    const customerRentals = await GetCustomerRentals(req.params.customerId)
+    try {
+      const customerRentals = await GetCustomerRentals(req.params.customerId)
+      res.status(200).json(customerRentals)
+    } catch (error) {
+      next(error)
+    }
+  }
 
-    res.status(200).json(customerRentals)
+  static async totalRentedFilms(req, res, next) {
+    try {
+      const topFilms = await GetTopRentedFilms()
+      console.log('Run', topFilms)
+      res.status(200).json(topFilms)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
 rentalRouter.get('/:customerId', RentalController.getCustomerRentals)
+rentalRouter.get('/', RentalController.totalRentedFilms)
 
 export default rentalRouter

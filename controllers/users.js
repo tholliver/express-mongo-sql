@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import userModel from '../models/mongo/user.js'
+import userModel from '../db/mongo/models/user.js'
 import { NotFoundError } from '../middleware/error-types.js'
 const userRouter = Router()
 

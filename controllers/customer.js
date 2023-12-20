@@ -22,17 +22,17 @@ class CustomerController {
     console.log('POST request on user by ID', req.params.id)
     // const results = await dbConn.select().from(customerSchema).where().execute()
 
-    const userFound = await dbConn.query.customerSchema.findFirst({
+    const customerFound = await dbConn.query.customerSchema.findFirst({
       where: (customerSchema, { eq }) =>
         eq(customerSchema.customer_id, req.params.id),
       with: { address: true },
     })
     const [avgCustomerPayment] = await GetSummaryCustomerPayments(req.params.id)
 
-    if (userFound && avgCustomerPayment)
+    if (customerFound && avgCustomerPayment)
       return res
         .status(200)
-        .send({ userInfo: userFound, paymentsSummary: avgCustomerPayment })
+        .send({ userInfo: customerFound, paymentsSummary: avgCustomerPayment })
 
     return res.send({ message: 'User not found' })
   }

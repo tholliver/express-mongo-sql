@@ -1,4 +1,4 @@
-import mongoose from '../../db/mongo/mongoose.js'
+import mongoose from '../mongoose.js'
 
 const userSchema = mongoose.Schema({
   name: String,

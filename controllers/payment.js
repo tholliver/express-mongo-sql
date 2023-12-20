@@ -2,7 +2,10 @@ import { customerSchema, paymentSchema } from '../db/sql/schemas/index.js'
 import { Router } from 'express'
 import dbConn from '../db/sql/dbConn.js'
 import { avg, eq, sql, count, sum } from 'drizzle-orm'
-import { GetSummaryCustomerPayments } from '../db/sql/repository/payments-repo.js'
+import {
+  GetAllPaymentsByDate,
+  GetSummaryCustomerPayments,
+} from '../db/sql/repository/payments-repo.js'
 // import { NotFoundError } from '../middleware/error-types'
 
 const paymentRouter = Router()
@@ -24,6 +27,15 @@ class PaymentController {
       // const customer
     } catch (error) {
       next(err)
+    }
+  }
+
+  static async getPayementsByDate(req, res, next) {
+    try {
+      const payments = await GetAllPaymentsByDate()
+      res.json(payments)
+    } catch (error) {
+      next(error)
     }
   }
 
@@ -62,6 +74,7 @@ class PaymentController {
 }
 
 paymentRouter.get('/', PaymentController.getPayements)
+paymentRouter.get('/date-pays', PaymentController.getPayementsByDate)
 paymentRouter.get('/customer/:customerId', PaymentController.getCustomerPayment)
 
 export default paymentRouter
