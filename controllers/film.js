@@ -16,7 +16,7 @@ class MoviesController {
       console.log('Movie found', film)
 
       if (!film) throw new NotFoundError('film tittle not found')
-      return res.send(film)
+      return res.staus(200).send(film)
     } catch (error) {
       next(error)
     }

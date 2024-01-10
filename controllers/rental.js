@@ -29,7 +29,7 @@ class RentalController {
   static async totalRentedFilms(req, res, next) {
     try {
       const topFilms = await GetTopRentedFilms()
-      console.log('Run', topFilms)
+      console.log('Run', topFilms.slice(0, 10))
       res.status(200).json(topFilms)
     } catch (error) {
       next(error)

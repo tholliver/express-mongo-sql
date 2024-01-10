@@ -62,11 +62,12 @@ export const GetCustomerRentals = async (customerId) => {
 
 export const GetTopRentedFilms = async () => {
   // count: sql`cast(count(${filmSchema.film_id}) as int)`,
-
   const queryRes = await dbConn
     .select({
       film_id: filmSchema.film_id,
       filmName: filmSchema.titulo,
+      amountMade: sum(paymentSchema.monto),
+      rating: filmSchema.rating,
       rentedTimes: sql`count(${filmSchema.film_id})`,
     })
     .from(filmSchema)
@@ -74,6 +75,10 @@ export const GetTopRentedFilms = async () => {
     .innerJoin(
       rentalSchema,
       eq(inventorySchema.inventory_id, rentalSchema.inventory_id)
+    )
+    .innerJoin(
+      paymentSchema,
+      eq(rentalSchema.rental_id, paymentSchema.rental_id)
     )
     .groupBy(filmSchema.film_id)
     .orderBy(desc(sql`count(${filmSchema.film_id})`))
