@@ -6,7 +6,6 @@ const userRouter = Router()
 class UserControlller {
   static async getUser(req, res, next) {
     const username = req.query.username
-    console.log(username)
     const searchKey = req.params.id
       ? { _id: `${req.params.id}` }
       : { username: username }

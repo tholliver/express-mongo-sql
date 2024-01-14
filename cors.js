@@ -12,7 +12,6 @@ export const corsMiddleware = ({ aceptedOrigins = ACCEPTED_ORIGINS } = {}) =>
       if (aceptedOrigins.includes(origin)) return callback(null, true)
 
       if (!origin) return callback(null, true)
-      console.log('CHECKING BAD: ', origin)
       return callback(new Error('Not allowed by cors'))
     },
   })

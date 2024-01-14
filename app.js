@@ -8,6 +8,7 @@ import filmRouter from './controllers/film.js'
 import paymentRouter from './controllers/payment.js'
 import { ErrorHandler, requestLogger } from './middleware/index.js'
 import rentalRouter from './controllers/rental.js'
+import statsRouter from './controllers/stats.js'
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.use('/staff', staffRouter)
 app.use('/films', filmRouter)
 app.use('/payments', paymentRouter)
 app.use('/rentals', rentalRouter)
+app.use('/stats', statsRouter)
 
 app.use(ErrorHandler)
 

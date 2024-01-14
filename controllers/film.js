@@ -16,9 +16,7 @@ class MoviesController {
     try {
       if (req.query.title !== undefined && req.query.title !== '') {
         const film = await getFilmByName(req.query.title)
-
         // if (!film) throw new NotFoundError('film title not found')
-        console.log('Fund', film, 'recived', req.query.title)
         return res.status(200).send(film)
       }
 

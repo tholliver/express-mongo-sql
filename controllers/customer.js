@@ -19,7 +19,7 @@ class CustomerController {
   }
 
   static async getCustomer(req, res) {
-    console.log('POST request on user by ID', req.params.id)
+    // console.log('POST request on user by ID', req.params.id)
     // const results = await dbConn.select().from(customerSchema).where().execute()
 
     const customerFound = await dbConn.query.customerSchema.findFirst({
