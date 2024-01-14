@@ -8,7 +8,7 @@ import {
   filmSchema,
 } from '../schemas/index.js'
 
-export const GetCustomerPayemnts = async () => {
+export const GetCustomerPayemnts = async (userId) => {
   return await dbConn
     .select({
       amout: paymentSchema.monto,
@@ -16,7 +16,7 @@ export const GetCustomerPayemnts = async () => {
       userLastName: customerSchema.apellido,
     })
     .from(customerSchema)
-    .where(eq(customerSchema.customer_id, req.params.userId))
+    .where(eq(customerSchema.customer_id, userId))
     .innerJoin(
       paymentSchema,
       eq(customerSchema.customer_id, paymentSchema.customer_id)
