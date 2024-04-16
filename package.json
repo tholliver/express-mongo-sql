@@ -6,7 +6,7 @@
   "main": "./api/index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon ./api/index.js",
-    "start": "cross-env NODE_ENV=production node ./api/index.js",
+    "start": "cross-env NODE_ENV=production nodemon ./api/index.js",
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit"
   },
   "author": "tholliver",

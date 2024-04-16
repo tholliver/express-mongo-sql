@@ -7,14 +7,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 if (process.env.NODE_ENV === 'production') {
   console.log('RUNNING PRODUCTION MODE')
-
   dotenv.config()
 }
 
 const PORT = process.env.PORT || 3000
 const MONGO_URI = process.env.MONGO_URI
 const PG_URI = process.env.PG_URI
-console.log(PG_URI)
 // const PG_URI = process.env.PG_PRO_URI
 
 export { PORT, MONGO_URI, PG_URI }
