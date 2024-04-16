@@ -5,25 +5,38 @@ import { Router } from 'express'
 import { NotFoundError } from '../middleware/error-types.js'
 import {
   getFilmById,
-  getFilmByName,
+  getFilmByTitle,
   getAllFilms,
+  getFilmByCategory,
+  getFilmByCategoryAndName,
 } from '../db/sql/repository/films-repo.js'
 
 const filmRouter = Router()
 
-class MoviesController {
-  static async getMovies(req, res, next) {
+class FilmsController {
+  static async searchFilms(req, res, next) {
+    const { category, title } = req.query
+    const offset = parseInt(req.query.offset) || 0
     try {
-      if (req.query.title !== undefined && req.query.title !== '') {
-        const film = await getFilmByName(req.query.title)
-        // if (!film) throw new NotFoundError('film title not found')
+      if (category && title) {
+        const categorizedFilm = await getFilmByCategoryAndName(
+          title,
+          category,
+          offset
+        )
+        return res.status(200).send(categorizedFilm)
+      }
+
+      if (category && !title) {
+        const filmsByCategory = await getFilmByCategory(category, offset)
+        return res.status(200).send(filmsByCategory)
+      }
+
+      if (title && !category) {
+        const film = await getFilmByTitle(title, offset)
         return res.status(200).send(film)
       }
 
-      const offset =
-        req.query.offset !== undefined && req.query.offset !== ''
-          ? req.query.offset
-          : 0
       const films = await getAllFilms(offset)
       return res.status(200).send(films)
     } catch (error) {
@@ -31,7 +44,17 @@ class MoviesController {
     }
   }
 
-  static async getMovieById(req, res, next) {
+  static async getFilms(req, res, next) {
+    const { offset } = req.query
+    try {
+      const films = await getAllFilms(offset || 0)
+      return res.status(200).send(films)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async getFilmById(req, res, next) {
     try {
       const film = await dbConn.query.filmSchema.findFirst({
         where: eq(filmSchema.film_id, req.params.id),
@@ -45,7 +68,8 @@ class MoviesController {
   }
 }
 
-filmRouter.get('/', MoviesController.getMovies)
-filmRouter.get('/:id', MoviesController.getMovieById)
+filmRouter.get('/', FilmsController.getFilms)
+filmRouter.get('/search', FilmsController.searchFilms)
+filmRouter.get('/:id', FilmsController.getFilmById)
 
 export default filmRouter

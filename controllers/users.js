@@ -9,9 +9,11 @@ class UserControlller {
     const searchKey = req.params.id
       ? { _id: `${req.params.id}` }
       : { username: username }
+
+    console.log(searchKey)
     try {
       const userFound = await userModel.findOne(searchKey)
-
+      console.log(userFound)
       if (!userFound) throw new NotFoundError('no user found')
       return res.status(200).send(userFound)
     } catch (error) {

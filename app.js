@@ -9,6 +9,7 @@ import paymentRouter from './controllers/payment.js'
 import { ErrorHandler, requestLogger } from './middleware/index.js'
 import rentalRouter from './controllers/rental.js'
 import statsRouter from './controllers/stats.js'
+import categoryRouter from './controllers/category.js'
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use(corsMiddleware())
 
 app.use('/users', userRouter)
 app.use('/stores', storeRouter)
+app.use('/categories', categoryRouter)
 app.use('/customers', customerRouter)
 app.use('/staff', staffRouter)
 app.use('/films', filmRouter)

@@ -7,7 +7,7 @@ mongoose
     console.log('Connected to the MONGO database')
   })
   .catch((error) => {
-    console.log(error)
+    console.error(error)
   })
 
 export default mongoose

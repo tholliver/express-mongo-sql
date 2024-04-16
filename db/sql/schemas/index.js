@@ -24,14 +24,14 @@ export const storeSchema = pgTable('store', {
 export const customerSchema = pgTable('customer', {
   customer_id: serial('customer_id'),
   store_id: integer('store_id'),
-  nombre: varchar('nombre', 50),
-  apellido: varchar('apellido', 50),
+  first_name: varchar('first_name', 50),
+  last_name: varchar('last_name', 50),
   email: varchar('email', 100),
   address_id: integer('address_id'),
   activebool: boolean('activebool'),
   create_date: timestamp('create_date', { default: 'now()' }),
   last_update: timestamp('last_update', { default: 'now()' }),
-  activo: boolean('activo'),
+  active: boolean('active'),
 })
 
 export const staffSchema = pgTable('staff', {
@@ -61,16 +61,23 @@ const tsVector = customType({
     return value
   },
 })
+
+export const categorySchema = pgTable('category', {
+  category_id: serial('category_id').primaryKey(),
+  name: varchar('name', { length: 25 }),
+  last_update: timestamp('last_update').notNull().default('now()'),
+})
+
 export const filmSchema = pgTable('film', {
   film_id: serial('film_id').primaryKey(),
-  titulo: varchar('titulo', { length: 255 }).notNull(),
-  descripcion: text('descripcion'),
-  lanzamiento: integer('lanzamiento'),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  release_year: integer('release_year'),
   language_id: smallint('language_id').notNull(),
-  duracion_de_renta: smallint('duracion_de_renta').notNull().default(3),
+  rental_duration: smallint('rental_duration').notNull().default(3),
   rental_rate: numeric('rental_rate').notNull().default(4.99),
-  duracion: smallint('duracion'),
-  costo_de_reemplazo: numeric('costo_de_reemplazo').notNull().default(19.99),
+  length: smallint('length'),
+  replacement_cost: numeric('replacement_cost').notNull().default(19.99),
   rating: ratingEnum('rating').default('G'),
   last_update: timestamp('last_update').notNull().default('now()'),
   special_features: text('special_features'), // NOTE: Special handling may be needed for array of text.
@@ -88,22 +95,22 @@ export const inventorySchema = pgTable('inventory', {
 
 export const rentalSchema = pgTable('rental', {
   rental_id: serial('rental_id').notNull(),
-  fecha_de_renta: timestamp('fecha_de_renta').notNull(),
+  rental_date: timestamp('rental_date').notNull(),
   inventory_id: integer('inventory_id').notNull(),
   customer_id: smallint('customer_id').notNull(),
-  fecha_de_retorno: timestamp('fecha_de_retorno'),
+  return_date: timestamp('return_date'),
   staff_id: smallint('staff_id').notNull(),
   last_update: timestamp('last_update', { default: 'now()' }),
 })
 
 export const addressSchema = pgTable('address', {
   address_id: serial('address_id').primaryKey(),
-  nombre: varchar('nombre', { length: 50 }).notNull(),
-  direccion2: varchar('direccion2', { length: 50 }),
-  distrito: varchar('distrito', { length: 20 }).notNull(),
+  address: varchar('address', { length: 50 }).notNull(),
+  address2: varchar('address2', { length: 50 }),
+  district: varchar('district', { length: 20 }).notNull(),
   city_id: smallint('city_id').notNull(),
   postal_code: varchar('postal_code', { length: 10 }),
-  telefono: varchar('telefono', { length: 20 }).notNull(),
+  phone: varchar('phone', { length: 20 }).notNull(),
   last_update: timestamp('last_update').default(`now()`),
 })
 
@@ -118,8 +125,8 @@ export const paymentSchema = pgTable('payment', {
   rental_id: integer('rental_id')
     .notNull()
     .references(() => rentalSchema.rental_id),
-  monto: numeric('monto').notNull(),
-  fecha: timestamp('fecha').notNull(),
+  amount: numeric('amount').notNull(),
+  payment_date: timestamp('payment_date').notNull(),
 })
 export const customerRelationships = relations(
   customerSchema,
@@ -130,6 +137,41 @@ export const customerRelationships = relations(
       fields: [customerSchema.address_id],
       references: [addressSchema.address_id],
     }),
+  })
+)
+
+export const filmsRelationships = relations(filmSchema, ({ many }) => ({
+  categoryToFilms: many(film_category),
+}))
+
+export const film_category = pgTable('film_category', {
+  film_id: integer('film_id')
+    .notNull()
+    .references(() => filmSchema.film_id),
+  category_id: integer('category_id')
+    .notNull()
+    .references(() => categorySchema.category_id),
+  last_update: timestamp('last_update').default(`now()`),
+})
+
+export const film_categoryRelationships = relations(
+  film_category,
+  ({ one }) => ({
+    film: one(filmSchema, {
+      fields: [film_category.film_id],
+      references: [filmSchema.film_id],
+    }),
+    category: one(categorySchema, {
+      fields: [film_category.category_id],
+      references: [categorySchema.category_id],
+    }),
+  })
+)
+
+export const categoriesRelationships = relations(
+  categorySchema,
+  ({ many }) => ({
+    categoryToFilms: many(film_category),
   })
 )
 
