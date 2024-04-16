@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import { PG_URI } from '../../utils/config.js'
+import { PG_URI } from '../../config/index.js'
 import * as schema from './schemas/index.js'
 
 // for query purposes

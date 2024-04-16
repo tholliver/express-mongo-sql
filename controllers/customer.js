@@ -7,8 +7,6 @@ import {
 } from '../db/sql/repository/payments-repo.js'
 // import { customerSchema } from '../db/schema/dvdrental.js'
 
-// import dbConn from '../db/pgConn.js'
-
 const customerRouter = Router()
 
 class CustomerController {

@@ -1,4 +1,4 @@
-import { MONGO_URI } from '../../utils/config.js'
+import { MONGO_URI } from '../../config/index.js'
 import mongoose from 'mongoose'
 
 mongoose
