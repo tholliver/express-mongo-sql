@@ -1,5 +1,5 @@
 import dbConn from '../dbConn.js'
-import { eq, sum, count, asc, sql, desc } from 'drizzle-orm'
+import { eq, sum, count, sql } from 'drizzle-orm'
 import {
   customerSchema,
   inventorySchema,
@@ -11,9 +11,9 @@ import {
 export const GetCustomerPayemnts = async (userId) => {
   return await dbConn
     .select({
-      amout: paymentSchema.monto,
-      userName: customerSchema.nombre,
-      userLastName: customerSchema.apellido,
+      amout: paymentSchema.amount,
+      userName: customerSchema.first_name,
+      userLastName: customerSchema.last_name,
     })
     .from(customerSchema)
     .where(eq(customerSchema.customer_id, userId))
@@ -26,24 +26,48 @@ export const GetCustomerPayemnts = async (userId) => {
 export const GetAllPaymentsByDate = async () => {
   return await dbConn
     .select({
-      date: sql`TO_CHAR(DATE_TRUNC('day', ${paymentSchema.fecha}), 'YYYY-MM-DD') AS date_only`,
-      dayTotal: sum(paymentSchema.monto),
+      date: sql`TO_CHAR(DATE_TRUNC('day', ${paymentSchema.payment_date}), 'YYYY-MM-DD') AS date_only`,
+      dayTotal: sum(paymentSchema.amount),
     })
     .from(paymentSchema)
-    .groupBy(sql`DATE_TRUNC('day',${paymentSchema.fecha})`)
-    .orderBy(sql`DATE_TRUNC('day',${paymentSchema.fecha})`)
+    .groupBy(sql`DATE_TRUNC('day',${paymentSchema.payment_date})`)
+    .orderBy(sql`DATE_TRUNC('day',${paymentSchema.payment_date})`)
 }
 
 export const GetCustomerRentals = async (customerId) => {
+  console.log(
+    dbConn
+      .select({
+        filmName: filmSchema.title,
+        rentalDate: rentalSchema.payment_date,
+        returnDate: rentalSchema.return_date,
+        amountPaid: sql`${paymentSchema.amount}`.mapWith(Number),
+      })
+      .from(filmSchema)
+      .where(eq(rentalSchema.customer_id, customerId))
+      .innerJoin(
+        inventorySchema,
+        eq(filmSchema.film_id, inventorySchema.film_id)
+      )
+      .innerJoin(
+        rentalSchema,
+        eq(inventorySchema.inventory_id, rentalSchema.inventory_id)
+      )
+      .innerJoin(
+        paymentSchema,
+        eq(paymentSchema.rental_id, rentalSchema.rental_id)
+      )
+      .toSQL()
+  )
   return await dbConn
     .select({
-      filmName: filmSchema.titulo,
-      rentalDate: rentalSchema.fecha_de_renta,
-      returnDate: rentalSchema.fecha_de_retorno,
-      amountPaid: sql`${paymentSchema.monto}`.mapWith(Number),
+      filmName: filmSchema.title,
+      rentalDate: rentalSchema.payment_date,
+      returnDate: rentalSchema.return_date,
+      amountPaid: sql`${paymentSchema.amount}`.mapWith(Number),
     })
     .from(filmSchema)
-    .where(eq(rentalSchema.customer_id, customerId))
+    .where(eq(rentalSchema.customer_id, sql`${customerId}`))
     .innerJoin(inventorySchema, eq(filmSchema.film_id, inventorySchema.film_id))
     .innerJoin(
       rentalSchema,
@@ -58,32 +82,6 @@ export const GetCustomerRentals = async (customerId) => {
   //   rentalSchema.fecha_de_renta,
   //   rentalSchema.fecha_de_retorno
   // )
-}
-
-export const GetTopRentedFilms = async () => {
-  // count: sql`cast(count(${filmSchema.film_id}) as int)`,
-  const queryRes = await dbConn
-    .select({
-      film_id: filmSchema.film_id,
-      filmName: filmSchema.titulo,
-      amountMade: sum(paymentSchema.monto),
-      rating: filmSchema.rating,
-      rentedTimes: sql`count(${filmSchema.film_id})`,
-    })
-    .from(filmSchema)
-    .innerJoin(inventorySchema, eq(filmSchema.film_id, inventorySchema.film_id))
-    .innerJoin(
-      rentalSchema,
-      eq(inventorySchema.inventory_id, rentalSchema.inventory_id)
-    )
-    .innerJoin(
-      paymentSchema,
-      eq(rentalSchema.rental_id, paymentSchema.rental_id)
-    )
-    .groupBy(filmSchema.film_id)
-    .orderBy(desc(sql`count(${filmSchema.film_id})`))
-
-  return queryRes
 }
 
 export const GetSummaryCustomerPayments = async (customerId) => {
